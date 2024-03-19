@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class FormPostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +25,16 @@ class LoginRequest extends FormRequest
     {
         return [
             //
-            'email' =>'required|email',
-            'password' =>'required|min:4'
+            'title' => ['required', 'min:8'],
+            'slug' => ['required', 'min:8', 'regex:/^[0-9a-z\-]+$/', Rule::unique('posts')->ignore($this->route()->parameter('post'))],
+            'content' => ['required']
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'slug' => $this->input('slug') ?: Str::slug($this->input('title'))
+        ]);
     }
 }
